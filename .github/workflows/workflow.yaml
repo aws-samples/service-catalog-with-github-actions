@@ -1,0 +1,14 @@
+name: Create ServiceCatalog Product
+on:
+    workflow_dispatch:
+          inputs:
+
+jobs:
+  service-catalog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
