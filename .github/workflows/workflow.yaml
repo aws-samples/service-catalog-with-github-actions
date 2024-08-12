@@ -7,28 +7,15 @@ on:
         type: string
       aws_region:
         description: Target AWS Region
-        default: "us-west-2"
-        type: string
-      backend_s3_bucket:
-        description: Name of the S3bucket for Terraform backend
-        default: "terraform-backend-primary-region"
-        type: string
-      backend_dynamodb_table:
-        description: DynamoDB table for State lock
-        default: "terraform-backend-ddb"
-        type: string
-      backend_iam_role:
-        description: Name of the Terraform backend assumable IAM Role
-        default: "workload-assumable-role"
-        type: string
-      github_iam_role:
-        description: Name of the IAM Role for adding access to ECR repo
-        default: "github-actions-role"
+        default: "us-east-1"
         type: string
 
 jobs:
   service-catalog:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
 
     steps:
       - name: Checkout
@@ -37,5 +24,5 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/github-actions-rmodi
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/github-actions
           aws-region: ${{ inputs.aws_region }}
