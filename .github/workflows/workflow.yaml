@@ -1,7 +1,30 @@
 name: Create ServiceCatalog Product
 on:
-    workflow_dispatch:
-          inputs:
+  workflow_dispatch:
+    inputs:
+      aws_account_id:
+        description: AWS Account ID
+        type: string
+      aws_region:
+        description: Target AWS Region
+        default: "us-west-2"
+        type: string
+      backend_s3_bucket:
+        description: Name of the S3bucket for Terraform backend
+        default: "terraform-backend-primary-region"
+        type: string
+      backend_dynamodb_table:
+        description: DynamoDB table for State lock
+        default: "terraform-backend-ddb"
+        type: string
+      backend_iam_role:
+        description: Name of the Terraform backend assumable IAM Role
+        default: "workload-assumable-role"
+        type: string
+      github_iam_role:
+        description: Name of the IAM Role for adding access to ECR repo
+        default: "github-actions-role"
+        type: string
 
 jobs:
   service-catalog:
@@ -11,4 +34,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/github-actions-rmodi
+          aws-region: ${{ inputs.aws_region }}
