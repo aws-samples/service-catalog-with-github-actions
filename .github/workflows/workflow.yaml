@@ -1,6 +1,6 @@
 name: Create ServiceCatalog Product
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       aws_account_id:
         description: AWS Account ID
@@ -8,6 +8,60 @@ on:
       aws_region:
         description: Target AWS Region
         default: "us-east-1"
+        type: string
+      cftStackName:
+        description: "CloudFormation Stack Name"
+        required: true
+        type: string
+        default: "e2e-test-servicecatalog-action"
+      cftTemplate:
+        description: "CloudFormation Service Catalog Product Template Name"
+        required: true
+        type: string
+        default: "./e2e-test/servicecatalog-portfolio.yml"
+      s3TemplateURL:
+        description: "S3 Url for the CloudFormation Template"
+        required: true
+        type: string
+      PortfolioProvider:
+        description: "PortfolioProvider"
+        required: true
+        type: string
+        default: "DevOps Team"
+      PortfolioName:
+        description: "Portfolio Name"
+        required: true
+        type: string
+        default: "E2E Test ServiceCatalog"
+      LaunchConstraintRole:
+        description: "Name of the Launch Constraint Role"
+        default: "service-catalog-launch-constraint-role"
+        type: string
+      ProductVersion:
+        description: "The name of the provisioning artifact (for example, v1 v2beta). No spaces are allowed"
+        required: true
+        type: string
+        default: "v1.0"
+      PortfolioDescription:
+        description: "Description of the SC Portfolio"
+        required: true
+        type: string
+        default: "S3 Portfolio"
+      ProductDescription:
+        description: "Description of the SC Product"
+        required: true
+        type: string
+        default: "S3 Product"
+      PrincipalArn:
+        description: |
+          The ARN of the principal (user, role, or group). 
+          If the PrincipalType is IAM, the supported value is a fully defined IAM Amazon Resource Name (ARN). 
+          If the PrincipalType is IAM_PATTERN, the supported value is an IAM ARN without an AccountID in the following format: "arn:partition:iam:::resource-type/resource-id"
+        required: true
+        type: string
+      PrincipalType:
+        description: The supported value is IAM if you use a fully defined Amazon Resource Name (ARN), or IAM_PATTERN if you use an ARN with no accountID, with or without wildcard characters.
+        required: true
         type: string
 
 jobs:
@@ -17,12 +71,34 @@ jobs:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
 
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/github-actions
           aws-region: ${{ inputs.aws_region }}
+          
+      - name: Deploy to AWS CloudFormation
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.2.0
+        id: prodId
+        env:
+          AWS_REGION: ${{ inputs.aws_region }}
+        with:
+          name: ${{ inputs.cftStackName }}
+          template: ${{ inputs.cftTemplate }}
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: >-
+            PortfolioProvider=${{ inputs.PortfolioProvider }},
+            LaunchConstraintRole=${{ inputs.LaunchConstraintRole }},
+            PortfolioProvider=${{ inputs.PortfolioProvider }},
+            PortfolioName=${{ inputs.PortfolioName }},
+            ProductVersion=${{ inputs.ProductVersion }},
+            PortfolioDescription=${{ inputs.PortfolioDescription }},
+            ProductDescription=${{ inputs.ProductDescription }},
+            S3TemplateURL=${{ inputs.s3TemplateURL }},
+            PrincipalARN=${{ inputs.PrincipalArn }},
+            PrincipalType=${{ inputs.PrincipalType }}
