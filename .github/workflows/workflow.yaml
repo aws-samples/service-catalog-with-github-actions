@@ -18,7 +18,7 @@ on:
         description: "CloudFormation Service Catalog Product Template Name"
         required: true
         type: string
-        default: "./e2e-test/servicecatalog-portfolio.yml"
+        default: "./templates/servicecatalog-portfolio.yml"
       s3TemplateURL:
         description: "S3 Url for the CloudFormation Template"
         required: true
