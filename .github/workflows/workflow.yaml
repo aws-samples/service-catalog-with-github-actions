@@ -18,9 +18,9 @@ on:
         description: "CloudFormation Service Catalog Product Template Name"
         required: true
         type: string
-        default: "./e2e-test/servicecatalog-portfolio.yml"
-      s3TemplateURL:
-        description: "S3 Url for the CloudFormation Template"
+        default: "./templates/servicecatalog-portfolio.yml"
+      s3BucketName:
+        description: Name of the AWS S3 bucket to upload sample Cloudformation template
         required: true
         type: string
       PortfolioProvider:
@@ -81,6 +81,18 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/github-actions
           aws-region: ${{ inputs.aws_region }}
+      
+      - name: Upload sample VPC CLoudformation template into AWS S3 bucket
+        shell: bash
+        id: upload
+        run: |
+          set -euo pipefail
+          
+          filename="vpc.yaml"
+          aws s3 cp ./templates/${filename} "s3://${{ inputs.s3BucketName }}/${filename}"
+          s3_template_url=https://${{ inputs.s3BucketName }}.s3.${{ inputs.aws_region }}.amazonaws.com/${filename}
+          echo "${s3_template_url}"
+          echo "s3_template_url=${s3_template_url}" >> $GITHUB_OUTPUT
           
       - name: Deploy to AWS CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1.2.0
@@ -99,6 +111,6 @@ jobs:
             ProductVersion=${{ inputs.ProductVersion }},
             PortfolioDescription=${{ inputs.PortfolioDescription }},
             ProductDescription=${{ inputs.ProductDescription }},
-            S3TemplateURL=${{ inputs.s3TemplateURL }},
+            S3TemplateURL=${{ steps.upload.outputs.s3_template_url }},
             PrincipalARN=${{ inputs.PrincipalArn }},
             PrincipalType=${{ inputs.PrincipalType }}
