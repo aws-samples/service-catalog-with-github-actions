@@ -63,7 +63,11 @@ on:
         description: The supported value is IAM if you use a fully defined Amazon Resource Name (ARN), or IAM_PATTERN if you use an ARN with no accountID, with or without wildcard characters.
         required: true
         type: string
-
+      filename:
+        description: The name of the CloudFormation template containing resources for which ServiceCatalog Portfolio needs to be created (e.g: vpc.yaml)
+        required: true
+        type: string
+        
 jobs:
   service-catalog:
     runs-on: ubuntu-latest
@@ -82,19 +86,18 @@ jobs:
           role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/github-actions
           aws-region: ${{ inputs.aws_region }}
       
-      - name: Upload sample VPC CLoudformation template into AWS S3 bucket
+      - name: Upload CLoudformation template to AWS S3 bucket
         shell: bash
         id: upload
         run: |
           set -euo pipefail
           
-          filename="vpc.yaml"
-          aws s3 cp ./templates/${filename} "s3://${{ inputs.s3BucketName }}/${filename}"
-          s3_template_url=https://${{ inputs.s3BucketName }}.s3.${{ inputs.aws_region }}.amazonaws.com/${filename}
+          aws s3 cp ./templates/${{ inputs.filename }} "s3://${{ inputs.s3BucketName }}/${{ inputs.filename }}"
+          s3_template_url=https://${{ inputs.s3BucketName }}.s3.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.filename }}
           echo "${s3_template_url}"
           echo "s3_template_url=${s3_template_url}" >> $GITHUB_OUTPUT
           
-      - name: Deploy to AWS CloudFormation
+      - name: Deploy AWS ServiceCatalog Portfolio and related rescources using AWS CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1.2.0
         id: prodId
         env:
