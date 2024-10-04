@@ -72,7 +72,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [0, !GetAZs ""]
       CidrBlock: !Ref PublicSubnet1CIDR
-      MapPublicIpOnLaunch: true
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
@@ -83,7 +83,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [1, !GetAZs ""]
       CidrBlock: !Ref PublicSubnet2CIDR
-      MapPublicIpOnLaunch: true
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
@@ -147,7 +147,7 @@ Resources:
     DependsOn: InternetGatewayAttachment
     Properties:
       RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: <Restricted IP Range>
       GatewayId: !Ref InternetGateway
 
   PublicSubnet1RouteTableAssociation:
@@ -174,7 +174,7 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTable1
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: <Restricted IP Range>
       NatGatewayId: !Ref NatGateway1
 
   PrivateSubnet1RouteTableAssociation:
@@ -195,7 +195,7 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTable2
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: <Restricted IP Range>
       NatGatewayId: !Ref NatGateway2
 
   PrivateSubnet2RouteTableAssociation:
