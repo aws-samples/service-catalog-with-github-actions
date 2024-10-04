@@ -44,6 +44,14 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref EnvironmentName
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      LogDestinationType: cloud-watch-logs
+      TrafficType: ALL
+      LogGroupName: !Ref EnvironmentName
+      ResourceId: !Ref VPC
+      ResourceType: VPC
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
