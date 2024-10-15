@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description:  ServiceCatalog product,portfolio template for AWS VPC
+
+Parameters:
+  PortfolioDescription:
+    Type: String
+    Description: Portfolio Description
+    Default: >-
+      Service Catalog Portfolio that contains products
+      for Amazon S3.
+  PortfolioName:
+    Type: String
+    Description: Portfolio Name
+    Default: Service Catalog for S3
+  PortfolioProvider:
+    Type: String
+    Description: Owner and Distributor Name
+  ProductDescription:
+    Type: String
+    Description: Product Description
+    Default: >-
+      This product creates an Amazon S3 bucket
+  SupportEmail:
+    Type: String
+    Description: The contact URL for product support
+    Default: "support@devops.com"
+  LaunchConstraintRole:
+    Type: String
+    Description: ARN of the launch constraint role for VPC products.
+    Default: "service-catalog-launch-constraint-role"
+  S3TemplateURL:
+    Type: String
+    Description: Url for the repo containing the VPC product template.
+  ProductVersion:
+    Type: String
+    Description: The name of the provisioning artifact (for example, v1 v2beta). No spaces are allowed
+  PrincipalARN:
+    Type: String
+    Description: |
+      The ARN of the principal (user, role, or group). 
+      If the PrincipalType is IAM, the supported value is a fully defined IAM Amazon Resource Name (ARN). 
+      If the PrincipalType is IAM_PATTERN, the supported value is an IAM ARN without an AccountID in the following format: "arn:partition:iam:::resource-type/resource-id"
+  PrincipalType:
+    Type: String
+    Description: |
+      The principal type. 
+      The supported value is IAM if you use a fully defined Amazon Resource Name (ARN), or IAM_PATTERN if you use an ARN with no accountID, with or without wildcard characters.
+
+Resources:
+  scPortfolio:
+    Type: "AWS::ServiceCatalog::Portfolio"
+    Properties:
+      ProviderName: !Ref PortfolioProvider
+      Description: !Ref PortfolioDescription
+      DisplayName: !Ref PortfolioName
+  
+  scProduct:
+    Type: "AWS::ServiceCatalog::CloudFormationProduct"
+    Properties:
+      Name: Amazon VPC 
+      Description: !Ref ProductDescription
+      Owner: !Ref PortfolioProvider
+      Distributor: !Ref PortfolioProvider
+      SupportEmail: !Ref SupportEmail
+      AcceptLanguage: en
+      ProvisioningArtifactParameters:
+        - Description: baseline version
+          Info:
+            LoadTemplateFromURL: !Sub "${S3TemplateURL}"
+          Name: !Ref ProductVersion
+
+  associatePortfolioProduct:
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    Properties:
+      PortfolioId: !Ref scPortfolio
+      ProductId: !Ref scProduct
+
+  launchConstraint:
+    Type: "AWS::ServiceCatalog::LaunchRoleConstraint"
+    DependsOn: associatePortfolioProduct
+    Properties:
+      PortfolioId: !Ref scPortfolio
+      ProductId: !Ref scProduct
+      LocalRoleName: !Ref LaunchConstraintRole
+      Description: !Ref LaunchConstraintRole
+  
+  associatePortfolioPrincipal:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref scPortfolio
+      PrincipalARN: !Ref PrincipalARN
+      PrincipalType: !Ref PrincipalType
+
+Outputs:
+  PortFolioID:
+    Value: !Ref scPortfolio
+  ProductId:
+    Value: !Ref scProduct

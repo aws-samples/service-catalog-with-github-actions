@@ -1,0 +1,26 @@
+name: e2e tests
+
+on: [push]
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+      
+jobs:
+  e2e-test:
+    uses: ./.github/workflows/workflow.yaml
+    with:
+      cftStackName: "e2e-test-servicecatalog-action"
+      cftTemplate: "./templates/servicecatalog-portfolio.yml"
+      PortfolioProvider: "DevOps Team"
+      PortfolioName: "E2E Test ServiceCatalog Action"
+      PortfolioDescription: "E2E Portfolio"
+      aws_region: "us-east-1"
+      aws_account_id: "0123456789012"
+      s3BucketName: "service-catalog-0123456789012"
+      ProductVersion: "v1.0"
+      ProductDescription: "VPC Product"
+      LaunchConstraintRole: "Admin"
+      PrincipalArn: "arn:aws:iam:::role/Admin"
+      PrincipalType: "IAM_PATTERN"
+      filename: "vpc.yaml"
