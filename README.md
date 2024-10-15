@@ -59,9 +59,12 @@ Steps to trigger the workflow:
 6. As this `e2e-test.yaml` file has the "trigger" as `push`, the main workflow will trigger as soon as you push the changes to this file.
 
 ## Best practices
-Please make sure to follow provided best practices, as this is not in the scope of this solution.
+Please make sure to follow the recommended best practices, as this is not in the scope of this solution.
+1. The Security best practices as prescribed by AWS for [Service Catalog](#https://docs.aws.amazon.com/servicecatalog/latest/adminguide/security-best-practices.html)
+2. [Security hardening for GitHub Actions](#https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)
 
 ## Limitations
+This reusable code has been tested only with GitHub Actions
 
 ## Security
 
